@@ -1,0 +1,5 @@
+{
+  "name": "PMODE1 Retro Editor v1",
+  "description": "A high-fidelity retro drawing application inspired by MacPaint and the TRS-80 Color Computer's PMODE1, featuring a 128x96 resolution and a strict 4-color palette.",
+  "requestFramePermissions": []
+}
