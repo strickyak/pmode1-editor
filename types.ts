@@ -5,7 +5,10 @@ export enum Tool {
   Bucket = 'Bucket',
   Rect = 'Rect',
   Circle = 'Circle',
-  Line = 'Line'
+  Line = 'Line',
+  Text = 'Text',
+  Copy = 'Copy',
+  Paste = 'Paste'
 }
 
 export type ColorHex = '#00FF00' | '#FF0000' | '#FFFF00' | '#0000FF';

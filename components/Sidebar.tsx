@@ -13,6 +13,8 @@ interface SidebarProps {
   onTogglePalette: () => void;
   paletteIdx: number;
   palette: string[];
+  fontSizeIdx?: number;
+  setFontSizeIdx?: (idx: number) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -24,7 +26,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onTogglePermute,
   onTogglePalette,
   paletteIdx,
-  palette
+  palette,
+  fontSizeIdx = 0,
+  setFontSizeIdx
 }) => {
   const tools = [
     { id: Tool.Pencil, label: '✎', title: 'Pencil' },
@@ -33,6 +37,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: Tool.Line, label: '╱', title: 'Line' },
     { id: Tool.Rect, label: '□', title: 'Rectangle' },
     { id: Tool.Circle, label: '○', title: 'Circle' },
+    { id: Tool.Text, label: 'T', title: 'Text' },
+    { id: Tool.Copy, label: '❐', title: 'Copy' },
+    { id: Tool.Paste, label: '📋', title: 'Paste' },
   ];
 
   const paletteNames = PALETTE_NAMES_SET[paletteIdx];
@@ -59,6 +66,23 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
       </div>
+
+      {currentTool === Tool.Text && setFontSizeIdx && (
+        <div className="flex flex-col gap-1 bg-black bg-opacity-20 p-1 rounded">
+          <h3 className="text-center text-[9px] text-gray-500 uppercase font-bold">Size</h3>
+          {[3, 4, 5].map((size, idx) => (
+            <button
+              key={size}
+              onClick={() => setFontSizeIdx(idx)}
+              className={`text-[10px] py-0.5 border ${
+                fontSizeIdx === idx ? 'bg-white text-black' : 'bg-gray-700 text-white'
+              }`}
+            >
+              {size === 3 ? '3x5' : size === 4 ? '4x6' : '5x7'}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-col items-center gap-1.5">
         <h3 className="text-center text-[10px] text-gray-500 uppercase font-bold">Modes</h3>
