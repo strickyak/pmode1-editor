@@ -22028,7 +22028,9 @@
     onTogglePermute,
     onTogglePalette,
     paletteIdx,
-    palette
+    palette,
+    fontSizeIdx = 0,
+    setFontSizeIdx
   }) => {
     const tools = [
       { id: "Pencil" /* Pencil */, label: "\u270E", title: "Pencil" },
@@ -22036,7 +22038,10 @@
       { id: "Bucket" /* Bucket */, label: "\u{1FAA3}", title: "Fill" },
       { id: "Line" /* Line */, label: "\u2571", title: "Line" },
       { id: "Rect" /* Rect */, label: "\u25A1", title: "Rectangle" },
-      { id: "Circle" /* Circle */, label: "\u25CB", title: "Circle" }
+      { id: "Circle" /* Circle */, label: "\u25CB", title: "Circle" },
+      { id: "Text" /* Text */, label: "T", title: "Text" },
+      { id: "Copy" /* Copy */, label: "\u2750", title: "Copy" },
+      { id: "Paste" /* Paste */, label: "\u{1F4CB}", title: "Paste" }
     ];
     const paletteNames = PALETTE_NAMES_SET[paletteIdx];
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", { className: "w-24 bg-[#222] border-r-4 border-black p-2 flex flex-col gap-4 overflow-y-auto custom-scrollbar", children: [
@@ -22056,6 +22061,18 @@
           },
           tool.id
         )) })
+      ] }),
+      currentTool === "Text" /* Text */ && setFontSizeIdx && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-col gap-1 bg-black bg-opacity-20 p-1 rounded", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "text-center text-[9px] text-gray-500 uppercase font-bold", children: "Size" }),
+        [3, 4, 5].map((size, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => setFontSizeIdx(idx),
+            className: `text-[10px] py-0.5 border ${fontSizeIdx === idx ? "bg-white text-black" : "bg-gray-700 text-white"}`,
+            children: size === 3 ? "3x5" : size === 4 ? "4x6" : "5x7"
+          },
+          size
+        ))
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex flex-col items-center gap-1.5", children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { className: "text-center text-[10px] text-gray-500 uppercase font-bold", children: "Modes" }),
@@ -22217,21 +22234,286 @@
 
   // components/CanvasEditor.tsx
   var import_react2 = __toESM(require_react(), 1);
+
+  // fonts.ts
+  var font3x5 = {
+    width: 3,
+    height: 5,
+    data: {
+      32: [0, 0, 0, 0, 0],
+      // Space
+      65: [2, 5, 7, 5, 5],
+      // A
+      66: [6, 5, 6, 5, 6],
+      // B
+      67: [3, 4, 4, 4, 3],
+      // C
+      68: [6, 5, 5, 5, 6],
+      // D
+      69: [7, 4, 6, 4, 7],
+      // E
+      70: [7, 4, 6, 4, 4],
+      // F
+      71: [3, 4, 5, 5, 3],
+      // G
+      72: [5, 5, 7, 5, 5],
+      // H
+      73: [7, 2, 2, 2, 7],
+      // I
+      74: [1, 1, 1, 5, 2],
+      // J
+      75: [5, 5, 6, 5, 5],
+      // K
+      76: [4, 4, 4, 4, 7],
+      // L
+      77: [5, 7, 5, 5, 5],
+      // M
+      78: [5, 5, 5, 7, 5],
+      // N
+      79: [2, 5, 5, 5, 2],
+      // O
+      80: [6, 5, 6, 4, 4],
+      // P
+      81: [2, 5, 5, 6, 1],
+      // Q
+      82: [6, 5, 6, 5, 5],
+      // R
+      83: [3, 4, 2, 1, 6],
+      // S
+      84: [7, 2, 2, 2, 2],
+      // T
+      85: [5, 5, 5, 5, 7],
+      // U
+      86: [5, 5, 5, 5, 2],
+      // V
+      87: [5, 5, 5, 7, 5],
+      // W
+      88: [5, 5, 2, 5, 5],
+      // X
+      89: [5, 5, 2, 2, 2],
+      // Y
+      90: [7, 1, 2, 4, 7],
+      // Z
+      48: [2, 5, 5, 5, 2],
+      // 0
+      49: [2, 6, 2, 2, 7],
+      // 1
+      50: [6, 1, 2, 4, 7],
+      // 2
+      51: [6, 1, 2, 1, 6],
+      // 3
+      52: [5, 5, 7, 1, 1],
+      // 4
+      53: [7, 4, 6, 1, 6],
+      // 5
+      54: [2, 4, 6, 5, 2],
+      // 6
+      55: [7, 1, 2, 2, 2],
+      // 7
+      56: [2, 5, 2, 5, 2],
+      // 8
+      57: [2, 5, 3, 1, 2],
+      // 9
+      46: [0, 0, 0, 0, 2],
+      // .
+      44: [0, 0, 0, 2, 4],
+      // ,
+      33: [2, 2, 2, 0, 2],
+      // !
+      63: [6, 1, 2, 0, 2]
+      // ?
+    }
+  };
+  var font4x6 = {
+    width: 4,
+    height: 6,
+    data: {
+      32: [0, 0, 0, 0, 0, 0],
+      // Space
+      65: [6, 9, 15, 9, 9, 9],
+      // A
+      66: [14, 9, 14, 9, 9, 14],
+      // B
+      67: [6, 9, 8, 8, 9, 6],
+      // C
+      68: [12, 10, 9, 9, 10, 12],
+      // D
+      69: [15, 8, 14, 8, 8, 15],
+      // E
+      70: [15, 8, 14, 8, 8, 8],
+      // F
+      71: [6, 9, 8, 11, 9, 6],
+      // G
+      72: [9, 9, 15, 9, 9, 9],
+      // H
+      73: [14, 4, 4, 4, 4, 14],
+      // I
+      74: [2, 2, 2, 2, 10, 4],
+      // J
+      75: [9, 10, 12, 10, 9, 9],
+      // K
+      76: [8, 8, 8, 8, 8, 15],
+      // L
+      77: [9, 15, 15, 9, 9, 9],
+      // M
+      78: [9, 13, 11, 9, 9, 9],
+      // N
+      79: [6, 9, 9, 9, 9, 6],
+      // O
+      80: [14, 9, 14, 8, 8, 8],
+      // P
+      81: [6, 9, 9, 9, 10, 5],
+      // Q
+      82: [14, 9, 14, 10, 9, 9],
+      // R
+      83: [6, 9, 4, 2, 9, 6],
+      // S
+      84: [15, 4, 4, 4, 4, 4],
+      // T
+      85: [9, 9, 9, 9, 9, 6],
+      // U
+      86: [9, 9, 9, 9, 10, 4],
+      // V
+      87: [9, 9, 9, 15, 15, 9],
+      // W
+      88: [9, 9, 6, 6, 9, 9],
+      // X
+      89: [9, 9, 6, 4, 4, 4],
+      // Y
+      90: [15, 2, 4, 8, 8, 15],
+      // Z
+      48: [6, 9, 11, 13, 9, 6],
+      // 0
+      49: [4, 12, 4, 4, 4, 14],
+      // 1
+      50: [6, 9, 2, 4, 8, 15],
+      // 2
+      51: [14, 1, 6, 1, 9, 6],
+      // 3
+      52: [2, 6, 10, 15, 2, 2],
+      // 4
+      53: [15, 8, 14, 1, 1, 14],
+      // 5
+      54: [6, 8, 14, 9, 9, 6],
+      // 6
+      55: [15, 1, 2, 4, 4, 4],
+      // 7
+      56: [6, 9, 6, 9, 9, 6],
+      // 8
+      57: [6, 9, 9, 7, 1, 6],
+      // 9
+      46: [0, 0, 0, 0, 0, 4],
+      // .
+      44: [0, 0, 0, 0, 4, 8],
+      // ,
+      33: [4, 4, 4, 4, 0, 4],
+      // !
+      63: [6, 9, 2, 4, 0, 4]
+      // ?
+    }
+  };
+  var font5x7 = {
+    width: 5,
+    height: 7,
+    data: {
+      32: [0, 0, 0, 0, 0, 0, 0],
+      65: [4, 10, 17, 17, 31, 17, 17],
+      66: [30, 17, 17, 30, 17, 17, 30],
+      67: [14, 17, 16, 16, 16, 17, 14],
+      68: [28, 18, 17, 17, 17, 18, 28],
+      69: [31, 16, 16, 30, 16, 16, 31],
+      70: [31, 16, 16, 30, 16, 16, 16],
+      71: [14, 17, 16, 23, 17, 17, 14],
+      72: [17, 17, 17, 31, 17, 17, 17],
+      73: [14, 4, 4, 4, 4, 4, 14],
+      74: [7, 2, 2, 2, 2, 18, 12],
+      75: [17, 18, 20, 24, 20, 18, 17],
+      76: [16, 16, 16, 16, 16, 16, 31],
+      77: [17, 27, 21, 21, 17, 17, 17],
+      78: [17, 17, 25, 21, 19, 17, 17],
+      79: [14, 17, 17, 17, 17, 17, 14],
+      80: [30, 17, 17, 30, 16, 16, 16],
+      81: [14, 17, 17, 17, 21, 18, 13],
+      82: [30, 17, 17, 30, 20, 18, 17],
+      83: [15, 16, 16, 14, 1, 1, 30],
+      84: [31, 4, 4, 4, 4, 4, 4],
+      85: [17, 17, 17, 17, 17, 17, 14],
+      86: [17, 17, 17, 17, 17, 10, 4],
+      87: [17, 17, 17, 21, 21, 27, 17],
+      88: [17, 17, 10, 4, 10, 17, 17],
+      89: [17, 17, 10, 4, 4, 4, 4],
+      90: [31, 1, 2, 4, 8, 16, 31],
+      48: [14, 17, 19, 21, 25, 17, 14],
+      49: [4, 12, 4, 4, 4, 4, 14],
+      50: [14, 17, 1, 2, 4, 8, 31],
+      51: [31, 2, 4, 2, 1, 17, 14],
+      52: [2, 6, 10, 18, 31, 2, 2],
+      53: [31, 16, 30, 1, 1, 17, 14],
+      54: [6, 8, 16, 30, 17, 17, 14],
+      55: [31, 1, 2, 4, 8, 8, 8],
+      56: [14, 17, 17, 14, 17, 17, 14],
+      57: [14, 17, 17, 15, 1, 2, 12],
+      46: [0, 0, 0, 0, 0, 0, 4],
+      44: [0, 0, 0, 0, 0, 4, 8],
+      33: [4, 4, 4, 4, 4, 0, 4],
+      63: [14, 17, 1, 2, 4, 0, 4]
+    }
+  };
+  var getPlaceholder = (w, h) => Array(h).fill((1 << w) - 1);
+  var FONTS = [
+    font3x5,
+    font4x6,
+    font5x7
+  ];
+  function getCharBitmap(font, char) {
+    const code = char.toUpperCase().charCodeAt(0);
+    return font.data[code] || getPlaceholder(font.width, font.height);
+  }
+
+  // components/CanvasEditor.tsx
   var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
   var CanvasEditor = ({
     pixelData,
-    updatePixels,
+    commitPixels,
+    setPixelsLive,
     currentTool,
     currentColorIdx,
     width,
     height,
     zoom,
-    palette
+    palette,
+    fontSizeIdx,
+    scrap,
+    setScrap
   }) => {
     const canvasRef = (0, import_react2.useRef)(null);
     const overlayRef = (0, import_react2.useRef)(null);
     const [isDrawing, setIsDrawing] = (0, import_react2.useState)(false);
     const [startPoint, setStartPoint] = (0, import_react2.useState)(null);
+    const [mousePoint, setMousePoint] = (0, import_react2.useState)({ x: 0, y: 0 });
+    const [inputText, setInputText] = (0, import_react2.useState)("");
+    const font = FONTS[fontSizeIdx];
+    (0, import_react2.useEffect)(() => {
+      if (currentTool !== "Text" /* Text */) {
+        if (inputText !== "")
+          setInputText("");
+        return;
+      }
+      const handleKeyDown = (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey)
+          return;
+        if (e.key === "Backspace") {
+          setInputText((prev) => prev.slice(0, -1));
+        } else if (e.key.length === 1) {
+          const code = e.key.charCodeAt(0);
+          if (code >= 32 && code <= 126) {
+            setInputText((prev) => prev + e.key);
+          }
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [currentTool, inputText]);
     (0, import_react2.useEffect)(() => {
       const canvas = canvasRef.current;
       if (!canvas)
@@ -22242,8 +22524,7 @@
       ctx.clearRect(0, 0, width, height);
       const imageData = ctx.createImageData(width, height);
       for (let i = 0; i < pixelData.length; i++) {
-        const colorIndex = pixelData[i];
-        const colorHex = palette[colorIndex];
+        const colorHex = palette[pixelData[i]];
         const r = parseInt(colorHex.slice(1, 3), 16);
         const g = parseInt(colorHex.slice(3, 5), 16);
         const b = parseInt(colorHex.slice(5, 7), 16);
@@ -22255,6 +22536,85 @@
       }
       ctx.putImageData(imageData, 0, 0);
     }, [pixelData, width, height, palette]);
+    const bakeText = (0, import_react2.useCallback)((data, text, x, y, colorIdx, activeFont) => {
+      const totalWidth = text.length * (activeFont.width + 1) - 1;
+      const startX = Math.round(x - totalWidth / 2);
+      const startY = Math.round(y - activeFont.height / 2);
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const bitmap = getCharBitmap(activeFont, char);
+        const charOffsetX = startX + i * (activeFont.width + 1);
+        for (let row = 0; row < activeFont.height; row++) {
+          const bits = bitmap[row];
+          for (let col = 0; col < activeFont.width; col++) {
+            if (bits >> activeFont.width - 1 - col & 1) {
+              const px = charOffsetX + col;
+              const py = startY + row;
+              if (px >= 0 && px < width && py >= 0 && py < height) {
+                data[py * width + px] = colorIdx;
+              }
+            }
+          }
+        }
+      }
+    }, [width, height]);
+    (0, import_react2.useEffect)(() => {
+      const overlay = overlayRef.current;
+      if (!overlay)
+        return;
+      const ctx = overlay.getContext("2d");
+      if (!ctx)
+        return;
+      ctx.clearRect(0, 0, width, height);
+      if (currentTool === "Text" /* Text */ && inputText.length > 0) {
+        const tempData = new Uint8Array(width * height).fill(255);
+        bakeText(tempData, inputText, mousePoint.x, mousePoint.y, currentColorIdx, font);
+        const imgData = ctx.createImageData(width, height);
+        for (let i = 0; i < tempData.length; i++) {
+          if (tempData[i] === 255)
+            continue;
+          const colorHex = palette[tempData[i]];
+          const idx = i * 4;
+          imgData.data[idx] = parseInt(colorHex.slice(1, 3), 16);
+          imgData.data[idx + 1] = parseInt(colorHex.slice(3, 5), 16);
+          imgData.data[idx + 2] = parseInt(colorHex.slice(5, 7), 16);
+          imgData.data[idx + 3] = 255;
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+      if (currentTool === "Paste" /* Paste */ && scrap) {
+        const imgData = ctx.createImageData(width, height);
+        for (let i = 0; i < imgData.data.length; i += 4)
+          imgData.data[i + 3] = 0;
+        const startX = Math.round(mousePoint.x - scrap.w / 2);
+        const startY = Math.round(mousePoint.y - scrap.h / 2);
+        for (let y = 0; y < scrap.h; y++) {
+          for (let x = 0; x < scrap.w; x++) {
+            const px = startX + x;
+            const py = startY + y;
+            if (px >= 0 && px < width && py >= 0 && py < height) {
+              const colorIdx = scrap.data[y * scrap.w + x];
+              const colorHex = palette[colorIdx];
+              const targetIdx = (py * width + px) * 4;
+              imgData.data[targetIdx] = parseInt(colorHex.slice(1, 3), 16);
+              imgData.data[targetIdx + 1] = parseInt(colorHex.slice(3, 5), 16);
+              imgData.data[targetIdx + 2] = parseInt(colorHex.slice(5, 7), 16);
+              imgData.data[targetIdx + 3] = 180;
+            }
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+      if (currentTool === "Copy" /* Copy */ && isDrawing && startPoint) {
+        const left = Math.min(startPoint.x, mousePoint.x);
+        const top = Math.min(startPoint.y, mousePoint.y);
+        const right = Math.max(startPoint.x, mousePoint.x);
+        const bottom = Math.max(startPoint.y, mousePoint.y);
+        ctx.strokeStyle = "#000000";
+        ctx.setLineDash([2, 1]);
+        ctx.strokeRect(left, top, right - left + 1, bottom - top + 1);
+      }
+    }, [currentTool, inputText, mousePoint, currentColorIdx, font, palette, width, height, bakeText, scrap, isDrawing, startPoint]);
     const getCanvasPoint = (e) => {
       const canvas = canvasRef.current;
       if (!canvas)
@@ -22268,15 +22628,12 @@
       };
     };
     const drawPoint = (data, x, y, colorIdx) => {
-      if (x >= 0 && x < width && y >= 0 && y < height) {
+      if (x >= 0 && x < width && y >= 0 && y < height)
         data[y * width + x] = colorIdx;
-      }
     };
     const drawLine = (data, x0, y0, x1, y1, colorIdx) => {
-      const dx = Math.abs(x1 - x0);
-      const dy = Math.abs(y1 - y0);
-      const sx = x0 < x1 ? 1 : -1;
-      const sy = y0 < y1 ? 1 : -1;
+      const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+      const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
       let err = dx - dy;
       while (true) {
         drawPoint(data, x0, y0, colorIdx);
@@ -22294,10 +22651,8 @@
       }
     };
     const drawRect = (data, x0, y0, x1, y1, colorIdx) => {
-      const left = Math.min(x0, x1);
-      const right = Math.max(x0, x1);
-      const top = Math.min(y0, y1);
-      const bottom = Math.max(y0, y1);
+      const left = Math.min(x0, x1), right = Math.max(x0, x1);
+      const top = Math.min(y0, y1), bottom = Math.max(y0, y1);
       for (let x = left; x <= right; x++) {
         drawPoint(data, x, top, colorIdx);
         drawPoint(data, x, bottom, colorIdx);
@@ -22309,9 +22664,7 @@
     };
     const drawCircle = (data, xc, yc, x1, y1, colorIdx) => {
       const r = Math.floor(Math.sqrt(Math.pow(x1 - xc, 2) + Math.pow(y1 - yc, 2)));
-      let x = 0;
-      let y = r;
-      let d = 3 - 2 * r;
+      let x = 0, y = r, d = 3 - 2 * r;
       const plot = (x2, y2) => {
         drawPoint(data, xc + x2, yc + y2, colorIdx);
         drawPoint(data, xc - x2, yc + y2, colorIdx);
@@ -22350,31 +22703,57 @@
     };
     const handleMouseDown = (e) => {
       const pt = getCanvasPoint(e);
+      if (currentTool === "Text" /* Text */) {
+        if (inputText.length > 0) {
+          const newData = new Uint8Array(pixelData);
+          bakeText(newData, inputText, pt.x, pt.y, currentColorIdx, font);
+          commitPixels(newData);
+          setInputText("");
+        }
+        return;
+      }
+      if (currentTool === "Paste" /* Paste */) {
+        if (scrap) {
+          const newData = new Uint8Array(pixelData);
+          const startX = Math.round(pt.x - scrap.w / 2);
+          const startY = Math.round(pt.y - scrap.h / 2);
+          for (let y = 0; y < scrap.h; y++) {
+            for (let x = 0; x < scrap.w; x++) {
+              const px = startX + x;
+              const py = startY + y;
+              if (px >= 0 && px < width && py >= 0 && py < height) {
+                newData[py * width + px] = scrap.data[y * scrap.w + x];
+              }
+            }
+          }
+          commitPixels(newData);
+        }
+        return;
+      }
       setIsDrawing(true);
       setStartPoint(pt);
       if (currentTool === "Pencil" /* Pencil */ || currentTool === "Eraser" /* Eraser */) {
         const newData = new Uint8Array(pixelData);
-        const useColor = currentTool === "Eraser" /* Eraser */ ? 0 : currentColorIdx;
-        drawPoint(newData, pt.x, pt.y, useColor);
-        updatePixels(newData);
+        drawPoint(newData, pt.x, pt.y, currentTool === "Eraser" /* Eraser */ ? 0 : currentColorIdx);
+        setPixelsLive(newData);
       } else if (currentTool === "Bucket" /* Bucket */) {
         const newData = new Uint8Array(pixelData);
         floodFill(newData, pt.x, pt.y, currentColorIdx);
-        updatePixels(newData);
+        commitPixels(newData);
       }
     };
     const handleMouseMove = (e) => {
+      const pt = getCanvasPoint(e);
+      setMousePoint(pt);
       if (!isDrawing)
         return;
-      const pt = getCanvasPoint(e);
       if (currentTool === "Pencil" /* Pencil */ || currentTool === "Eraser" /* Eraser */) {
         const newData = new Uint8Array(pixelData);
-        const useColor = currentTool === "Eraser" /* Eraser */ ? 0 : currentColorIdx;
-        if (startPoint) {
-          drawLine(newData, startPoint.x, startPoint.y, pt.x, pt.y, useColor);
-        }
+        if (startPoint)
+          drawLine(newData, startPoint.x, startPoint.y, pt.x, pt.y, currentTool === "Eraser" /* Eraser */ ? 0 : currentColorIdx);
         setStartPoint(pt);
-        updatePixels(newData);
+        setPixelsLive(newData);
+      } else if (currentTool === "Copy" /* Copy */) {
       } else {
         const overlay = overlayRef.current;
         if (!overlay)
@@ -22408,23 +22787,39 @@
       if (!isDrawing)
         return;
       const pt = getCanvasPoint(e);
-      if (currentTool !== "Pencil" /* Pencil */ && currentTool !== "Eraser" /* Eraser */ && currentTool !== "Bucket" /* Bucket */) {
+      if (currentTool === "Copy" /* Copy */ && startPoint) {
+        const x1 = Math.min(startPoint.x, pt.x);
+        const y1 = Math.min(startPoint.y, pt.y);
+        const x2 = Math.max(startPoint.x, pt.x);
+        const y2 = Math.max(startPoint.y, pt.y);
+        const w = x2 - x1 + 1;
+        const h = y2 - y1 + 1;
+        if (w > 0 && h > 0) {
+          const scrapData = new Uint8Array(w * h);
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              scrapData[y * w + x] = pixelData[(y1 + y) * width + (x1 + x)];
+            }
+          }
+          setScrap({ data: scrapData, w, h });
+        }
+      } else if (currentTool === "Pencil" /* Pencil */ || currentTool === "Eraser" /* Eraser */) {
+        commitPixels(pixelData);
+      } else if (currentTool === "Line" /* Line */ || currentTool === "Rect" /* Rect */ || currentTool === "Circle" /* Circle */) {
         const newData = new Uint8Array(pixelData);
         if (startPoint) {
           if (currentTool === "Line" /* Line */)
             drawLine(newData, startPoint.x, startPoint.y, pt.x, pt.y, currentColorIdx);
-          if (currentTool === "Rect" /* Rect */)
+          else if (currentTool === "Rect" /* Rect */)
             drawRect(newData, startPoint.x, startPoint.y, pt.x, pt.y, currentColorIdx);
-          if (currentTool === "Circle" /* Circle */)
+          else if (currentTool === "Circle" /* Circle */)
             drawCircle(newData, startPoint.x, startPoint.y, pt.x, pt.y, currentColorIdx);
         }
-        updatePixels(newData);
+        commitPixels(newData);
       }
       const overlay = overlayRef.current;
-      if (overlay) {
-        const ctx = overlay.getContext("2d");
-        ctx?.clearRect(0, 0, width, height);
-      }
+      if (overlay)
+        overlay.getContext("2d")?.clearRect(0, 0, width, height);
       setIsDrawing(false);
       setStartPoint(null);
     };
@@ -22435,26 +22830,8 @@
       imageRendering: "pixelated"
     };
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "relative shadow-2xl retro-border bg-black shrink-0", style: canvasStyle, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-        "canvas",
-        {
-          ref: canvasRef,
-          width,
-          height,
-          className: "absolute inset-0 z-0 pointer-events-none w-full h-full",
-          style: { imageRendering: "pixelated" }
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-        "canvas",
-        {
-          ref: overlayRef,
-          width,
-          height,
-          className: "absolute inset-0 z-10 pointer-events-none w-full h-full",
-          style: { imageRendering: "pixelated" }
-        }
-      ),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("canvas", { ref: canvasRef, width, height, className: "absolute inset-0 z-0 pointer-events-none w-full h-full" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("canvas", { ref: overlayRef, width, height, className: "absolute inset-0 z-10 pointer-events-none w-full h-full" }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
         "div",
         {
@@ -22578,6 +22955,8 @@
     const [history, setHistory] = (0, import_react4.useState)([]);
     const [historyIndex, setHistoryIndex] = (0, import_react4.useState)(-1);
     const [isPermutationMode, setIsPermutationMode] = (0, import_react4.useState)(false);
+    const [fontSizeIdx, setFontSizeIdx] = (0, import_react4.useState)(2);
+    const [scrap, setScrap] = (0, import_react4.useState)(null);
     const [rawImport, setRawImport] = (0, import_react4.useState)(null);
     const [importWeights, setImportWeights] = (0, import_react4.useState)([0, 0, 0, 0]);
     const currentPalette = (0, import_react4.useMemo)(() => PALETTES[paletteIdx], [paletteIdx]);
@@ -22602,9 +22981,8 @@
       setHistoryIndex(newHistory.length - 1);
     }, [history, historyIndex]);
     const commitImportAdjustment = (0, import_react4.useCallback)(() => {
-      if (rawImport) {
+      if (rawImport)
         setRawImport(null);
-      }
     }, [rawImport]);
     const undo = (0, import_react4.useCallback)(() => {
       commitImportAdjustment();
@@ -22628,11 +23006,14 @@
       setPixelData(cleared);
       saveToHistory(cleared);
     }, [saveToHistory]);
-    const updatePixels = (0, import_react4.useCallback)((newData) => {
+    const commitPixels = (0, import_react4.useCallback)((newData) => {
       setRawImport(null);
       setPixelData(newData);
       saveToHistory(newData);
     }, [saveToHistory]);
+    const setPixelsLive = (0, import_react4.useCallback)((newData) => {
+      setPixelData(newData);
+    }, []);
     const applyPermutation = (0, import_react4.useCallback)((mapping) => {
       setRawImport(null);
       const newData = new Uint8Array(WIDTH * HEIGHT);
@@ -22653,12 +23034,9 @@
         const r = imgData.data[i];
         const g = imgData.data[i + 1];
         const b = imgData.data[i + 2];
-        let minIdx = 0;
-        let minDistance = Infinity;
+        let minIdx = 0, minDistance = Infinity;
         for (let p = 0; p < paletteRGB.length; p++) {
-          const pr = paletteRGB[p].r;
-          const pg = paletteRGB[p].g;
-          const pb = paletteRGB[p].b;
+          const pr = paletteRGB[p].r, pg = paletteRGB[p].g, pb = paletteRGB[p].b;
           const distSq = Math.pow(r - pr, 2) + Math.pow(g - pg, 2) + Math.pow(b - pb, 2);
           const adjustedDist = distSq * weightMultipliers[p];
           if (adjustedDist < minDistance) {
@@ -22706,8 +23084,7 @@
           ctx.drawImage(img, dx, dy, dw, dh);
           const imgData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
           setImportWeights([0, 0, 0, 0]);
-          const initialWeights = [0, 0, 0, 0];
-          const initialPixels = quantize(imgData, initialWeights);
+          const initialPixels = quantize(imgData, [0, 0, 0, 0]);
           setRawImport({ imageData: imgData, bgIndex: 0 });
           setPixelData(initialPixels);
           saveToHistory(initialPixels);
@@ -22721,9 +23098,7 @@
       newWeights[idx] = val;
       setImportWeights(newWeights);
     };
-    const handleWeightCommit = () => {
-      saveToHistory(new Uint8Array(pixelData));
-    };
+    const handleWeightCommit = () => saveToHistory(new Uint8Array(pixelData));
     const downloadPNG = (0, import_react4.useCallback)(() => {
       const canvas = document.createElement("canvas");
       canvas.width = WIDTH;
@@ -22733,11 +23108,8 @@
         return;
       const imageData = ctx.createImageData(WIDTH, HEIGHT);
       for (let i = 0; i < pixelData.length; i++) {
-        const colorIndex = pixelData[i];
-        const colorHex = currentPalette[colorIndex];
-        const r = parseInt(colorHex.slice(1, 3), 16);
-        const g = parseInt(colorHex.slice(3, 5), 16);
-        const b = parseInt(colorHex.slice(5, 7), 16);
+        const colorHex = currentPalette[pixelData[i]];
+        const r = parseInt(colorHex.slice(1, 3), 16), g = parseInt(colorHex.slice(3, 5), 16), b = parseInt(colorHex.slice(5, 7), 16);
         const idx = i * 4;
         imageData.data[idx] = r;
         imageData.data[idx + 1] = g;
@@ -22779,28 +23151,26 @@
             onTogglePermute: () => setIsPermutationMode(!isPermutationMode),
             onTogglePalette: togglePalette,
             paletteIdx,
-            palette: currentPalette
+            palette: currentPalette,
+            fontSizeIdx,
+            setFontSizeIdx
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "flex-1 flex items-center justify-center bg-[#333] p-8 overflow-auto custom-scrollbar", children: isPermutationMode ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          PermutationView_default,
-          {
-            pixelData,
-            onSelect: applyPermutation,
-            onCancel: () => setIsPermutationMode(false),
-            palette: currentPalette
-          }
-        ) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "flex-1 flex items-center justify-center bg-[#333] p-8 overflow-auto custom-scrollbar", children: isPermutationMode ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PermutationView_default, { pixelData, onSelect: applyPermutation, onCancel: () => setIsPermutationMode(false), palette: currentPalette }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
           CanvasEditor_default,
           {
             pixelData,
-            updatePixels,
+            commitPixels,
+            setPixelsLive,
             currentTool,
             currentColorIdx,
             width: WIDTH,
             height: HEIGHT,
             zoom: ZOOM,
-            palette: currentPalette
+            palette: currentPalette,
+            fontSizeIdx,
+            scrap,
+            setScrap
           }
         ) })
       ] }),
