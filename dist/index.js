@@ -22949,7 +22949,7 @@
   var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
   var App = () => {
     const [currentTool, setCurrentTool] = (0, import_react4.useState)("Pencil" /* Pencil */);
-    const [currentColorIdx, setCurrentColorIdx] = (0, import_react4.useState)(0);
+    const [currentColorIdx, setCurrentColorIdx] = (0, import_react4.useState)(3);
     const [paletteIdx, setPaletteIdx] = (0, import_react4.useState)(0);
     const [pixelData, setPixelData] = (0, import_react4.useState)(new Uint8Array(WIDTH * HEIGHT).fill(0));
     const [history, setHistory] = (0, import_react4.useState)([]);
@@ -23005,7 +23005,10 @@
       const cleared = new Uint8Array(WIDTH * HEIGHT).fill(0);
       setPixelData(cleared);
       saveToHistory(cleared);
-    }, [saveToHistory]);
+      if (currentColorIdx === 0) {
+        setCurrentColorIdx(3);
+      }
+    }, [saveToHistory, currentColorIdx]);
     const commitPixels = (0, import_react4.useCallback)((newData) => {
       setRawImport(null);
       setPixelData(newData);
