@@ -20,7 +20,7 @@ interface Scrap {
 
 const App: React.FC = () => {
   const [currentTool, setCurrentTool] = useState<Tool>(Tool.Pencil);
-  const [currentColorIdx, setCurrentColorIdx] = useState<number>(0);
+  const [currentColorIdx, setCurrentColorIdx] = useState<number>(3);
   const [paletteIdx, setPaletteIdx] = useState<number>(0);
   const [pixelData, setPixelData] = useState<Uint8Array>(new Uint8Array(WIDTH * HEIGHT).fill(0));
   const [history, setHistory] = useState<Uint8Array[]>([]);
@@ -84,7 +84,10 @@ const App: React.FC = () => {
     const cleared = new Uint8Array(WIDTH * HEIGHT).fill(0);
     setPixelData(cleared);
     saveToHistory(cleared);
-  }, [saveToHistory]);
+    if (currentColorIdx === 0) {
+      setCurrentColorIdx(3);
+    }
+  }, [saveToHistory, currentColorIdx]);
 
   const commitPixels = useCallback((newData: Uint8Array) => {
     setRawImport(null);
