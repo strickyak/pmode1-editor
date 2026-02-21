@@ -192,11 +192,54 @@ const App: React.FC = () => {
     const link = document.createElement('a'); link.download = 'pmode1_artwork.png'; link.href = canvas.toDataURL(); link.click();
   }, [pixelData, currentPalette]);
 
+  const handleCopy = useCallback(async () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = WIDTH; canvas.height = HEIGHT;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const imageData = ctx.createImageData(WIDTH, HEIGHT);
+    for (let i = 0; i < pixelData.length; i++) {
+      const colorHex = currentPalette[pixelData[i]];
+      const r = parseInt(colorHex.slice(1, 3), 16), g = parseInt(colorHex.slice(3, 5), 16), b = parseInt(colorHex.slice(5, 7), 16);
+      const idx = i * 4; imageData.data[idx] = r; imageData.data[idx + 1] = g; imageData.data[idx + 2] = b; imageData.data[idx + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+        } catch (err) {
+          console.error('Failed to copy: ', err);
+        }
+      }
+    }, 'image/png');
+  }, [pixelData, currentPalette]);
+
+  const handlePaste = useCallback(async () => {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find(type => type.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], "pasted_image.png", { type: imageType });
+          handleImport(file);
+          break;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to paste: ', err);
+    }
+  }, [handleImport]);
+
   return (
     <div className="flex flex-col h-full bg-[#1e1e1e] select-none">
       <Header 
         undo={undo} redo={redo} canUndo={historyIndex > 0} canRedo={historyIndex < history.length - 1}
-        download={downloadPNG} clear={clearCanvas} onImport={handleImport}
+        download={downloadPNG} clear={clearCanvas} onCopy={handleCopy} onPaste={handlePaste} onImport={handleImport}
         importWeights={rawImport ? importWeights : null} onWeightChange={handleWeightChange} onWeightCommit={handleWeightCommit}
         palette={currentPalette}
       />
