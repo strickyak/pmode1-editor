@@ -8,6 +8,8 @@ interface HeaderProps {
   canRedo: boolean;
   download: () => void;
   clear: () => void;
+  onCopy: () => void;
+  onPaste: () => void;
   onImport: (file: File) => void;
   importWeights: number[] | null;
   onWeightChange: (idx: number, val: number) => void;
@@ -22,6 +24,8 @@ const Header: React.FC<HeaderProps> = ({
   canRedo, 
   download, 
   clear, 
+  onCopy,
+  onPaste,
   onImport,
   importWeights,
   onWeightChange,
@@ -56,16 +60,16 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-6 bg-black bg-opacity-40 p-2 px-6 border-x border-gray-800 rounded-lg">
             <span className="text-xs text-blue-400 font-bold uppercase tracking-tighter whitespace-nowrap">IMPORT BIAS:</span>
             {importWeights.map((weight, idx) => (
-              <div key={idx} className="flex flex-col items-center w-32 gap-1">
+              <div key={idx} className="flex flex-col items-center w-64 gap-1">
                 <div className="flex items-center gap-2 w-full justify-between">
                   <div className="w-4 h-4 border border-gray-600 rounded-sm" style={{backgroundColor: palette[idx]}} />
-                  <span className="text-[10px] text-gray-300 font-mono">{weight > 0 ? '+' : ''}{weight.toFixed(1)}</span>
+                  <span className="text-[10px] text-gray-300 font-mono">{weight > 0 ? '+' : ''}{weight.toFixed(2)}</span>
                 </div>
                 <input 
                   type="range"
                   min="-3"
                   max="3"
-                  step="0.1"
+                  step="0.05"
                   value={weight}
                   onChange={(e) => onWeightChange(idx, parseFloat(e.target.value))}
                   onMouseUp={onWeightCommit}
@@ -97,6 +101,18 @@ const Header: React.FC<HeaderProps> = ({
           className="retro-button px-4 py-1 bg-red-600 text-white text-xl hover:bg-red-500"
         >
           CLEAR
+        </button>
+        <button 
+          onClick={onCopy}
+          className="retro-button px-4 py-1 bg-purple-600 text-white text-xl hover:bg-purple-500"
+        >
+          COPY
+        </button>
+        <button 
+          onClick={onPaste}
+          className="retro-button px-4 py-1 bg-purple-600 text-white text-xl hover:bg-purple-500"
+        >
+          PASTE
         </button>
         <input 
           type="file" 
