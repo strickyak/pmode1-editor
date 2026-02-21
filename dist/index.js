@@ -22130,6 +22130,8 @@
     canRedo,
     download,
     clear,
+    onCopy,
+    onPaste,
     onImport,
     importWeights,
     onWeightChange,
@@ -22151,12 +22153,12 @@
       /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "flex items-center gap-4 shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h1", { className: "text-3xl font-bold text-yellow-500 tracking-widest drop-shadow-md", children: "PMODE1 EDITOR" }) }),
       /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "flex-1 mx-8 flex justify-center items-center gap-8 min-w-0 overflow-hidden", children: importWeights && /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "flex items-center gap-6 bg-black bg-opacity-40 p-2 px-6 border-x border-gray-800 rounded-lg", children: [
         /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "text-xs text-blue-400 font-bold uppercase tracking-tighter whitespace-nowrap", children: "IMPORT BIAS:" }),
-        importWeights.map((weight, idx) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "flex flex-col items-center w-32 gap-1", children: [
+        importWeights.map((weight, idx) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "flex flex-col items-center w-64 gap-1", children: [
           /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "flex items-center gap-2 w-full justify-between", children: [
             /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "w-4 h-4 border border-gray-600 rounded-sm", style: { backgroundColor: palette[idx] } }),
             /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("span", { className: "text-[10px] text-gray-300 font-mono", children: [
               weight > 0 ? "+" : "",
-              weight.toFixed(1)
+              weight.toFixed(2)
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
@@ -22165,7 +22167,7 @@
               type: "range",
               min: "-3",
               max: "3",
-              step: "0.1",
+              step: "0.05",
               value: weight,
               onChange: (e) => onWeightChange(idx, parseFloat(e.target.value)),
               onMouseUp: onWeightCommit,
@@ -22199,6 +22201,22 @@
             onClick: clear,
             className: "retro-button px-4 py-1 bg-red-600 text-white text-xl hover:bg-red-500",
             children: "CLEAR"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "button",
+          {
+            onClick: onCopy,
+            className: "retro-button px-4 py-1 bg-purple-600 text-white text-xl hover:bg-purple-500",
+            children: "COPY"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "button",
+          {
+            onClick: onPaste,
+            className: "retro-button px-4 py-1 bg-purple-600 text-white text-xl hover:bg-purple-500",
+            children: "PASTE"
           }
         ),
         /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
@@ -23125,6 +23143,52 @@
       link.href = canvas.toDataURL();
       link.click();
     }, [pixelData, currentPalette]);
+    const handleCopy = (0, import_react4.useCallback)(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = WIDTH;
+      canvas.height = HEIGHT;
+      const ctx = canvas.getContext("2d");
+      if (!ctx)
+        return;
+      const imageData = ctx.createImageData(WIDTH, HEIGHT);
+      for (let i = 0; i < pixelData.length; i++) {
+        const colorHex = currentPalette[pixelData[i]];
+        const r = parseInt(colorHex.slice(1, 3), 16), g = parseInt(colorHex.slice(3, 5), 16), b = parseInt(colorHex.slice(5, 7), 16);
+        const idx = i * 4;
+        imageData.data[idx] = r;
+        imageData.data[idx + 1] = g;
+        imageData.data[idx + 2] = b;
+        imageData.data[idx + 3] = 255;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({ "image/png": blob })
+            ]);
+          } catch (err) {
+            console.error("Failed to copy: ", err);
+          }
+        }
+      }, "image/png");
+    }, [pixelData, currentPalette]);
+    const handlePaste = (0, import_react4.useCallback)(async () => {
+      try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const imageType = item.types.find((type) => type.startsWith("image/"));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            const file = new File([blob], "pasted_image.png", { type: imageType });
+            handleImport(file);
+            break;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to paste: ", err);
+      }
+    }, [handleImport]);
     return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "flex flex-col h-full bg-[#1e1e1e] select-none", children: [
       /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
         Header_default,
@@ -23135,6 +23199,8 @@
           canRedo: historyIndex < history.length - 1,
           download: downloadPNG,
           clear: clearCanvas,
+          onCopy: handleCopy,
+          onPaste: handlePaste,
           onImport: handleImport,
           importWeights: rawImport ? importWeights : null,
           onWeightChange: handleWeightChange,
